@@ -1,0 +1,51 @@
+#include <LiquidCrystal_I2C.h>//匯入I2C相容LCD函式庫
+#include <Keypad.h>//匯入薄膜式鍵盤函式庫
+LiquidCrystal_I2C lcd (0x27,16,2); //定義LCD
+const byte ROWS = 4; //定義 行
+const byte COLS = 4; //定義 列
+int data_count ;//定義 陣列資料計數
+char hexaKeys[ROWS][COLS] = { //宣告陣列 以對應鍵盤按鍵位置
+  {'1','2','3','A'},
+  {'4','5','6','B'},
+  {'7','8','9','C'},
+  {'*','0','#','D'}
+};
+byte rowPins[ROWS] = {9, 8, 7, 6}; //定義與連結"行"的資料輸入腳
+byte colPins[COLS] = {5, 4, 3, 2}; //定義與連結"列"的資料輸入腳
+
+Keypad customKeypad = Keypad( makeKeymap(hexaKeys), rowPins, colPins, ROWS, COLS);  //定義取得鍵盤輸入
+
+void setup(){
+  Serial.begin(9600); //Arduino 內部串列輸出序列埠
+  lcd.init(); // 初始化LCD
+  lcd.backlight(); //LCD背景光初始
+  lcd.print("--KeyPad  Test-- "); //列印" "，確認LCD有設定到
+}
+  
+void loop(){
+  lcd.setCursor(0,0); //設定顯示行列
+  lcd.print("--KeyPad  Test-- "); 
+  char customKey = customKeypad.getKey(); //宣告變數 
+  if (customKey){ // 若 有輸入資料
+  Data[data_count] = customKey; //將資料放入 陣列
+  lcd.setCursor(data_count,1); //設定 與 資料計數一樣之行 (使LCD顯示與輸入順序一樣)
+  lcd.print(Data[data_count]); //顯示 該輸入資料
+  data_count++;//使計數量增加 使下一進入資料相同
+  if (data_count>15){ //若輸入資料超過16個，達LCD顯示限制 ，則清除陣列資料
+    clearData();
+    data_count=0;
+    }
+    if (customKey == '#'){
+      lcd.clear();
+        }
+     }
+  }
+
+  void clearData()//清除密碼資料副程式
+{
+  while (data_count != 0)
+  { // This can be used for any array size,
+    Data[data_count--] = 0; //clear array for new data
+  }
+  return;
+}
